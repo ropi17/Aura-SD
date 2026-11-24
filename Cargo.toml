@@ -1,0 +1,54 @@
+[package]
+name = "aura_bot"
+version = "0.1.0"
+edition = "2021"
+default-run = "aura_bot"
+
+[dependencies]
+teloxide = { version = "0.12", features = ["macros", "rustls"] }
+tokio = { version = "1.8", features = ["rt-multi-thread", "macros"] }
+log = "0.4"
+pretty_env_logger = "0.5"
+governor = "0.6"
+nonzero_ext = "0.3"
+aura_api_client = { git = "https://github.com/in-aura-we-trade/aura_api_client.git", features = ["client", "client-generic", "api-types"], version = "0.1.0" }
+tonic = "0.14"
+tokio-stream = "0.1"
+prost = "0.13"
+dotenvy = "0.15.7"
+fastnum = "0.7.4"
+decisol = { git = "https://github.com/4r33x/decisol", version = "1.0.1" }
+solana-address = "2.7.0"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+# reqwest 0.11 HANYA untuk client Telegram: teloxide-core 0.9.1 memakai
+# reqwest 0.11 (bukan 0.12), jadi Bot::with_client butuh Client 0.11.
+# reqwest 0.12 di atas tetap dipakai untuk RPC/Dexscreener/Binance.
+reqwest011 = { package = "reqwest", version = "0.11", features = ["json", "rustls-tls"], default-features = false }
+serde_json = "1"
+chrono = "0.4"
+# Second Dip WSS (dipakai di src/seconddip.rs)
+# Fitur rustls-tls-webpki-roots: TLS murni Rust (tanpa OpenSSL), cocok dengan
+# reqwest/tonic yang sudah memakai rustls di proyek ini.
+tokio-tungstenite = { version = "0.26", features = ["rustls-tls-webpki-roots"] }
+futures-util = "0.3"
+# Proxy support (Telegram + WSS + HTTP RPC/Dexscreener lewat HTTP proxy —
+# VM ini memblokir direct TCP, jadi semua koneksi harus lewat proxy).
+# Versi diselaraskan dengan yang sudah dipakai tokio-tungstenite 0.26
+# (rustls 0.23, tokio-rustls 0.26, webpki-roots 0.26).
+# Feature `ring` eksplisit: rustls 0.23 butuh SATU crypto provider, tapi
+# `aws-lc-rs` juga ikut aktif lewat feature unification (reqwest 0.12),
+# sehingga auto-deteksi provider gagal dan rustls panic. `ring` dipilih
+# sebagai provider default lewat install_default() di awal main().
+rustls = { version = "0.23", features = ["ring"] }
+tokio-rustls = "0.26"
+webpki-roots = "0.26"
+# CA sistem (rustls-native-certs 0.8 = pasangan rustls 0.23): WSS TLS harus
+# percaya CA dari OS, BUKAN hanya webpki-roots. Alasan: egress proxy VM ini
+# MITM TLS dan menerbitkan ulang sertifikat dengan "Hatch Sandbox Egress CA"
+# (CA internal runtime, terpasang di CA store OS tapi TIDAK ada di webpki-roots).
+# Tanpa ini, handshake gagal "invalid peer certificate: UnknownIssuer".
+rustls-native-certs = "0.8"
+base64 = "0.22"
+bytes = "1"
+url = "2"
